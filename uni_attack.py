@@ -22,7 +22,9 @@ def get_avg(model, sentences, attack_phrase):
     edit_counts = []
     for sent in sentences:
         sent = concatenate(sent, attack_phrase)
+        print(sent)
         correction = correct(model, sent)
+        print(correction)
         edit_counts.append(count_edits(sent, correction))
     return mean(edit_counts)
 
