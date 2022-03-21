@@ -22,17 +22,18 @@ def get_avg(model, sentences, attack_phrase):
     edit_counts = []
     for sent in sentences:
         sent = concatenate(sent, attack_phrase)
-        import pdb; pdb.set_trace()
         correction = correct(model, sent)
-        import pdb; pdb.set_trace()
         edit_counts.append(count_edits(sent, correction))
     return mean(edit_counts)
 
 def concatenate(original, attack_phrase):
-    if original[-1] == '.':
-        together = original[:-1] + ', ' + attack_phrase
+    if len(original) > 0:
+        if original[-1] == '.':
+            together = original[:-1] + ', ' + attack_phrase
+        else:
+            together = original + ' ' + attack_phrase
     else:
-        together = original + ' ' + attack_phrase
+        together = attack_phrase[:]
     return together
 
 if __name__ == "__main__":
@@ -86,7 +87,6 @@ if __name__ == "__main__":
     for word in test_words:
         attack_phrase = args.prev_attack + ' ' + word + '.'
         edits_avg = get_avg(model, sentences, attack_phrase)
-        import pdb; pdb.set_trace()
 
         if edits_avg < best[1]:
             best = (word, edits_avg)
