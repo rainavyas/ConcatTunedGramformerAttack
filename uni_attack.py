@@ -10,10 +10,13 @@ import argparse
 import torch
 from gec_tools import get_sentences, correct, count_edits
 from Seq2seq import Seq2seq
-from eval_uni_attack import set_seeds
 import json
 from datetime import date
 from statistics import mean
+
+def set_seeds(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 def get_avg(model, sentences, attack_phrase):
     edit_counts = []
