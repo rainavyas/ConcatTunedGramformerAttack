@@ -19,6 +19,7 @@ from gec_tools import return_edits
 from collections import defaultdict
 from align_preds import align_data, get_sentences_dict
 from uni_attack import concatenate
+from statistics import mean, stdev
 
 def update_edit_types(ref_edits, pred_edits, ref_count, pred_total, pred_correct, pred_insert, pred_del):
     '''
@@ -42,6 +43,21 @@ def update_edit_types(ref_edits, pred_edits, ref_count, pred_total, pred_correct
             pred_correct[e.type] += 1
         else:
             pred_insert[e.type] += 1
+    
+def get_edits_by_part(original_sentence, attack_edits):
+    '''
+    Determine how many attack edits in which part of attacked sentence
+    '''
+
+    edit_strs = [e.o_str for e in attack_edits]
+    orig = 0
+    adv = 0
+    for e_str in edit_strs:
+        if original_sentence.find(e_str) == -1:
+            adv+=1
+        else:
+            orig+=1
+    return orig, adv
 
 
 if __name__ == "__main__":
@@ -78,6 +94,10 @@ if __name__ == "__main__":
     # Get fraction of samples with no edits
     num_samples_no_edits = 0
 
+    # count of edits per part
+    original_part_count = [] # for adv phrase, count of edits in non adv-part
+    adv_part_count = [] # for adv phrase, count of edits in adv-part
+
     for i, (s, r, p) in enumerate(zip(inc_sens, corr_sens, pred_sens)):
         print(f'On {i}/{len(inc_sens)}')
         ref_edits = return_edits(s, r)
@@ -90,9 +110,20 @@ if __name__ == "__main__":
         if len(pred_edits) == 0:
             num_samples_no_edits += 1
         update_edit_types(ref_edits, pred_edits, ref_count, pred_total, pred_correct, pred_insert, pred_del)
+
+        # Get edits by part of sentence
+        original_part, adv_part = get_edits_by_part(s, pred_edits)
+        original_part_count.append(original_part)
+        adv_part_count.append(adv_part)
     
     # Get fraction of samples with no edits
     frac_no_edits = num_samples_no_edits/len(inc_sens)
+
+    # Get average number of edits per original and adv part of sentence
+    orig_mean = mean(original_part_count)
+    orig_std = stdev(original_part_count)
+    adv_mean = mean(adv_part_count)
+    adv_std = stdev(adv_part_count)
     
     # Save edit type distribution to file
     texts = ['Type Ref-Count Pred-Total Pred-Correct Pred-Insert Pred-Delete']
@@ -100,6 +131,8 @@ if __name__ == "__main__":
         texts.append(f'\n{edit_type} {ref_count[edit_type]} {pred_total[edit_type]} {pred_correct[edit_type]} {pred_insert[edit_type]} {pred_del[edit_type]}')
     texts.append(f'\n\nSum {sum(ref_count.values())} {sum(pred_total.values())} {sum(pred_correct.values())} {sum(pred_insert.values())} {sum(pred_del.values())}')
     texts.append(f'\n\nFraction of Samples with no edits from source to prediction: {frac_no_edits}')
+    texts.append(f'\nOriginal Part Edits:\tMean: {orig_mean}\t Std: {orig_std}')
+    texts.append(f'\nAdv Part Edits:\tMean: {adv_mean}\t Std: {adv_std}')
     with open(args.OUT, 'w') as f:
             f.writelines(texts)
     
