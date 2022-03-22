@@ -10,31 +10,26 @@ import argparse
 import torch
 from gec_tools import get_sentences, correct, count_edits
 from Seq2seq import Seq2seq
+from eval_uni_attack import set_seeds
 import json
 from datetime import date
+from uni_attack import get_avg, concatenate
+from confidence import negative_confidence
 from statistics import mean
 
-def set_seeds(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-
-def get_avg(model, sentences, attack_phrase, delim=','):
-    edit_counts = []
+def is_conf_less_than_thresh(model, sentences, attack_phrase, thresh, delim=''):
+    '''
+        Return True if the average dataset confidence is less than threshold
+    '''
+    confs = []
     for sent in sentences:
         sent = concatenate(sent, attack_phrase, delim)
-        correction = correct(model, sent)
-        edit_counts.append(count_edits(sent, correction))
-    return mean(edit_counts)
-
-def concatenate(original, attack_phrase, delim=','):
-    if len(original) > 0:
-        if original[-1] == '.':
-            together = original[:-1] + delim + ' ' + attack_phrase
-        else:
-            together = original + ' ' + attack_phrase
-    else:
-        together = attack_phrase[:]
-    return together
+        conf = -1*negative_confidence(sent, model)
+        confs.append(conf)
+    avg_conf = mean(confs)
+    if avg_conf < thresh:
+        return True
+    return False
 
 if __name__ == "__main__":
 
@@ -48,6 +43,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--num_points', type=int, default=1000, help='Number of training data points to consider')
     commandLineParser.add_argument('--search_size', type=int, default=400, help='Number of words to check')
     commandLineParser.add_argument('--start', type=int, default=0, help='Vocab batch number')
+    commandLineParser.add_argument('--conf_thresh', type=float, default=0, help='Confidence Detector threshold')
     commandLineParser.add_argument('--seed', type=int, default=1, help='reproducibility')
     commandLineParser.add_argument('--delim', type=str, default='', help='concatenation delimiter')
     args = commandLineParser.parse_args()
@@ -55,7 +51,7 @@ if __name__ == "__main__":
     # Save the command run
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
-    with open('CMDs/uni_attack.cmd', 'a') as f:
+    with open('CMDs/uni_attack_evade_conf.cmd', 'a') as f:
         f.write(' '.join(sys.argv)+'\n')
     
     set_seeds(args.seed)
@@ -87,7 +83,10 @@ if __name__ == "__main__":
     best = ('none', 1000)
     for word in test_words:
         attack_phrase = args.prev_attack + ' ' + word + '.'
-        edits_avg = get_avg(model, sentences, attack_phrase, delim=args.delim)
+        if not is_conf_less_than_thresh(model, sentences, attack_phrase, args.conf_thresh, delim=args.delim):
+            continue
+        edits_avg = get_avg(model, sentences, attack_phrase)
+        # print(word, edits_avg) # temp debug
 
         if edits_avg < best[1]:
             best = (word, edits_avg)

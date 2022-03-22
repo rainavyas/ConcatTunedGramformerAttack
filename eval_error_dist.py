@@ -69,6 +69,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('PRED', type=str, help='Path to prediction data')
     commandLineParser.add_argument('OUT', type=str, help='Path to save edit type information')
     commandLineParser.add_argument('--phrase', type=str, default='', help='Universal adversarial phrase')
+    commandLineParser.add_argument('--delim', type=str, default='', help='concatenation delimiter')
     args = commandLineParser.parse_args()
 
     # Save the command run
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         s_with_attack = s[:]
         if args.phrase != '':
             attack_phrase = args.phrase + '.'
-            s_with_attack = concatenate(s, attack_phrase)
+            s_with_attack = concatenate(s, attack_phrase, delim=args.delim)
         pred_edits = return_edits(s_with_attack, p)
         if len(pred_edits) == 0:
             num_samples_no_edits += 1

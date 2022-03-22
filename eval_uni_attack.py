@@ -72,6 +72,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('EDIT_TYPE', type=str, help='Path to save edit type information')
     commandLineParser.add_argument('--phrase', type=str, default='', help='Universal adversarial phrase')
     commandLineParser.add_argument('--seed', type=int, default=1, help='reproducibility')
+    commandLineParser.add_argument('--delim', type=str, default='', help='concatenation delimiter')
     args = commandLineParser.parse_args()
 
     # Save the command run
@@ -103,7 +104,7 @@ if __name__ == "__main__":
         sent_with_attack = sent[:]
         if args.phrase != '':
             attack_phrase = args.phrase + '.'
-            sent_with_attack = concatenate(sent, attack_phrase)
+            sent_with_attack = concatenate(sent, attack_phrase, delim=args.delim)
 
         correction = correct(model, sent)
         correction_with_attack = correct(model, sent_with_attack)

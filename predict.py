@@ -41,6 +41,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('OUT_BASE', type=str, help='Path to corrected output data - pass only base name, e.g. beam1_N4 or no_attack')
     commandLineParser.add_argument('--phrase', type=str, default='', help='Universal adversarial phrase')
     commandLineParser.add_argument('--seed', type=int, default=1, help='reproducibility')
+    commandLineParser.add_argument('--delim', type=str, default='', help='concatenation delimiter')
     args = commandLineParser.parse_args()
 
     # Save the command run
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         print(f'On {i}/{len(sentences)}')
         if args.phrase != '':
             attack_phrase = args.phrase + '.'
-            sent = concatenate(sent, attack_phrase)
+            sent = concatenate(sent, attack_phrase, delim=args.delim)
         correction = correct(model, sent)
         corrections.append(correction)
         # if args.phrase != '':
