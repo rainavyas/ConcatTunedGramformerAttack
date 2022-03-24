@@ -108,6 +108,7 @@ if __name__ == "__main__":
             attack_phrase = args.phrase + '.'
             s_with_attack = concatenate(s, attack_phrase, delim=args.delim)
         pred_edits = return_edits(s_with_attack, p)
+        import pdb; pdb.set_trace()
         if len(pred_edits) == 0:
             num_samples_no_edits += 1
         update_edit_types(ref_edits, pred_edits, ref_count, pred_total, pred_correct, pred_insert, pred_del)
