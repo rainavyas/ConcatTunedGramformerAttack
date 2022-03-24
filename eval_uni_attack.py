@@ -98,6 +98,8 @@ if __name__ == "__main__":
     adv_part_count = [] # for adv phrase, count of edits in adv-part
     original_edit_types = defaultdict(int)
     adv_edit_types = defaultdict(int)
+    num_adv_samples_no_edits = 0
+    num_orig_samples_no_edits = 0
     for i, sent in enumerate(sentences):
 
         print(f'On {i}/{len(sentences)}')
@@ -113,11 +115,15 @@ if __name__ == "__main__":
         print(f'Prediction Sentence with attack: {correction_with_attack}')
 
         edits = return_edits(sent, correction)
+        if len(edits) == 0:
+            num_orig_samples_no_edits +=1
         update_edit_types(edits, original_edit_types)
         edits = [e.o_str+' -> '+e.c_str for e in edits]
         edit_counts.append(len(edits))
 
         edits_with_attack = return_edits(sent_with_attack, correction_with_attack)
+        if len(edits_with_attack) == 0:
+            num_adv_samples_no_edits +=1
         update_edit_types(edits_with_attack, adv_edit_types)
         original_part, adv_part = get_edits_by_part(sent, edits_with_attack)
         original_part_count.append(original_part)
@@ -129,6 +135,12 @@ if __name__ == "__main__":
 
         print(f'Edits without attack: {edits}')
         print(f'Edits with attack: {edits_with_attack}\n')
+
+    # Get fraction of samples with no edits
+    frac_adv_samples_no_edits = num_adv_samples_no_edits/len(sentences)
+    frac_orig_samples_no_edits = num_orig_samples_no_edits/len(sentences)
+    print(f'Fraction Original no edits {frac_orig_samples_no_edits}')
+    print(f'Fraction Adv no edits {frac_adv_samples_no_edits}')
 
     
 
