@@ -84,6 +84,10 @@ if __name__ == "__main__":
     corr_id2text = get_sentences_dict(args.REF)
     inc_sens, pred_sens, corr_sens = align_data(inc_id2text, pred_id2text, corr_id2text)
 
+    inc_sens = [s.rstrip('\n') for s in inc_sens]
+    pred_sens = [s.rstrip('\n') for s in pred_sens]
+    corr_sens = [s.rstrip('\n') for s in corr_sens]
+
 
     # Get the edit types dicts
     ref_count = defaultdict(int)
@@ -108,7 +112,7 @@ if __name__ == "__main__":
             attack_phrase = args.phrase + '.'
             s_with_attack = concatenate(s, attack_phrase, delim=args.delim)
         pred_edits = return_edits(s_with_attack, p)
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         if len(pred_edits) == 0:
             num_samples_no_edits += 1
         update_edit_types(ref_edits, pred_edits, ref_count, pred_total, pred_correct, pred_insert, pred_del)
