@@ -7,7 +7,7 @@ In this work, a universal concatentation adversarial attack is considered, where
 
 Here, the attack experiments are performed on the [FCE public dataset](https://ilexir.co.uk/datasets/index.html).
 
-The GEC system used is the T5 based [Gramformer system](https://githubhelp.com/PrithivirajDamodaran/Gramformer) (229.9M parameters) finetuned on [CLC+BEA data](https://www.cl.cam.ac.uk/research/nl/bea2019st/).
+The GEC system used is the [Gramformer system](https://githubhelp.com/PrithivirajDamodaran/Gramformer) (229.9M parameters) finetuned on [CLC+BEA data](https://www.cl.cam.ac.uk/research/nl/bea2019st/).
 
 # Example
 
