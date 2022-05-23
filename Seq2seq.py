@@ -6,7 +6,7 @@ This script is inspired from Edie's class definition of Seq2seq
 import torch.nn as nn
 
 # huggingface api
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, T5ForConditionalGeneration, T5Tokenizer
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -20,9 +20,12 @@ class Seq2seq(nn.Module):
 
         super(Seq2seq, self).__init__()
 
-        model_name = "prithivida/grammar_error_correcter_v1"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        # model_name = "prithivida/grammar_error_correcter_v1"
+        # self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+
+        self.model = T5ForConditionalGeneration.from_pretrained("t5-base")
+        self.tokenizer = T5Tokenizer.from_pretrained("t5-base")
     
     def correct(self, input_sentence, max_candidates=1):
         correction_prefix = "gec: "
